@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en" dir="rtl">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tracki - الشكاوى</title>
+    <link rel="stylesheet" href="Styles/Style.css" />
+    <link rel="stylesheet" href="Styles/AllTrucks.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Zain:wght@400&display=swap" rel="stylesheet" />
+    <style>
+        /* Modern, clean styling */
+        body {
+            font-family: "Zain", sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        h2 {
+            color: #7a557a;
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #status-filter {
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            background-color: white;
+            color: #333;
+        }
+
+        .complaints-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .complaint-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #7a557a;
+            cursor: pointer;
+        }
+
+        .complaint-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+            border-left-color: #c093e0;
+        }
+
+        .complaint-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .complaint-title {
+            font-weight: bold;
+            color: #333;
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .complaint-time {
+            color: #666;
+            font-size: 0.9em;
+            margin-left: 15px;
+        }
+
+        .complaint-preview {
+            color: #555;
+            margin-bottom: 10px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .complaint-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+        }
+
+        .status-pending {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+
+        .status-resolved {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .truck-info {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        #loading-spinner {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #7a557a;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .no-complaints {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            color: #dc3545;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Header -->
+    <div class="main-container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Header Section -->
+            <div class="headerOfBar">
+                <img src="images/TrackiLogo.png" alt="Logo" />
+                <h1>Tracki</h1>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul style="list-style: none; padding: 0; margin: 20px 0">
+                <li>
+                    <a href="MainPage.html"><i class="fas fa-home"></i> الرئيسية</a>
+                </li>
+                <li>
+                    <a href="WaitingTrucks.html"><i class="fas fa-truck-loading"></i> قيد الإنتظار</a>
+                </li>
+                <li>
+                    <a href="AllTrucks.html"><i class="fas fa-truck"></i> جميع العربات</a>
+                </li>
+                <li>
+                    <a href="LocationUpdateRequests.html"><i class="fas fa-map-marker-alt"></i> طلبات تحديث الموقع</a>
+                </li>
+                <li>
+                    <a href="History.html"><i class="fas fa-history"></i> سجل العمليات
+                    </a>
+                </li>
+                <li>
+                    <a href="Reviews.html"><i class="fas fa-star"></i> التقييمات</a>
+                </li>
+                <li>
+                    <a href="Complaints.html" style="
+                background-color: #7a557a;
+                color: #faf3f0;
+                font-weight: bold;
+                border-radius: 8px;
+              "><i class="fas fa-exclamation-circle"></i> الشكاوى</a>
+                </li>
+            </ul>
+        </div>
+
+        <section class="status-section">
+            <div class="left-actions">
+                <p id="status">مرحبًا!</p>
+            </div>
+
+            <div class="right-actions">
+                <!--*************************************************************************************************************-->
+                <div class="notification-wrapper">
+                    <div id="notification-trigger" class="notification-trigger">
+                        <i class="fas fa-bell notification-icon" title="الإشعارات"></i>
+                        <span id="notification-badge" class="notification-badge hidden"></span>
+                    </div>
+                    <div id="notification-popup" class="notification-popup hidden">
+                        <span id="notification-message"></span>
+                        <button id="notification-confirm" class="notification-confirm">عرض</button>
+                    </div>
+                </div>
+                <i id="logout-icon" class="fas fa-sign-out-alt logout-icon" title="تسجيل الخروج"></i>
+            </div>
+
+        </section>
+        <!-- Main Content -->
+        <div class="content">
+
+            <div class="loading" id="loading-message">
+                <img src="images/WaitingTruck2.png" alt="Loading Food Truck" loading="lazy" />
+                <p>الرجاء الإنتظار...</p>
+            </div>
+
+            <h2>الشكاوى</h2>
+            <div class="filter-container">
+                <label for="status-filter">تصفية حسب الحالة:</label>
+                <select id="status-filter" onchange="filterComplaints()">
+                    <option value="all">الكل</option>
+                    <option value="pending">قيد الإنتظار</option>
+                    <option value="resolved">تم الحل</option>
+                </select>
+            </div>
+
+            <div class="complaints-list" id="complaints-container">
+                <div id="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <div id="pagination-controls" style="text-align: center; margin-top: 20px"></div>
+
+        </div>
+    </div>
+    <!-- Footer -->
+    <div class="footer">
+        <p>تراكي 2025 ©. جميع الحقوق محفوظة - جامعة الملك سعود</p>
+    </div>
+    <!-- Firebase Script -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+        import {
+            getAuth,
+            onAuthStateChanged,
+            signOut,
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-auth.js";
+        import { getFirestore } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+        import {
+            collection,
+            getDocs,
+            doc,
+            getDoc,
+            updateDoc,
+            addDoc,
+        } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBL6Y2okjMbi3EcqrBnaE-ky-KvOF7hVA8",
+            authDomain: "trucki-database.firebaseapp.com",
+            projectId: "trucki-database",
+            storageBucket: "trucki-database.appspot.com",
+            messagingSenderId: "283818817351",
+            appId: "1:283818817351:web:bfa138d68f42dfc64c3e62",
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Check authentication status on page load
+        onAuthStateChanged(auth, (user) => {
+            const statusElement = document.getElementById("status");
+            if (user) {
+                const username = user.email.split("@")[0];
+                statusElement.innerText = `مرحبًا ${username} !`;
+                loadComplaints(); // Trigger complaints loading here
+                checkPendingTrucks(); //Notifications <!--*************************************************************************************************************-->
+                setInterval(checkPendingTrucks, 300000); // Check every 5 minutes
+            } else {
+                statusElement.innerText = "لم يتم تسجيل الدخول";
+                window.location.href = "WelcomePage.html";
+            }
+        });
+
+        //Pagination ---------------------------------
+        const rowsPerPage = 6; // Number of complaints per page
+        let currentPage = 1;
+        let allComplaints = [];
+        let totalPages = 0;
+
+        function formatTimestamp(timestamp) {
+            if (timestamp && timestamp.seconds) {
+                const date = new Date(timestamp.seconds * 1000);
+                return date.toLocaleString("ar-SA", {
+                    weekday: "long",
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+            }
+            return "غير محدد";
+        }
+
+        // Load complaints -----------added pagination
+        async function loadComplaints(filter = "all") {
+            const container = document.getElementById("complaints-container");
+            container.innerHTML = '<div id="loading-spinner"><div class="spinner"></div></div>';
+
+            const loadingMessage = document.getElementById('loading-message');
+
+            // Show loading message
+            loadingMessage.style.display = 'flex';
+            container.innerHTML = '';
+
+            try {
+                const complaintsSnapshot = await getDocs(collection(db, "Complaint"));
+                allComplaints = complaintsSnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                if (allComplaints.length === 0) {
+                    container.innerHTML = '<div class="no-complaints">لا توجد شكاوي</div>';
+                    return;
+                }
+
+                const processedComplaints = await Promise.all(
+                    allComplaints.map(async (complaint) => {
+                        const foodTruckDoc = await getDoc(doc(db, "Food_Truck", complaint.foodTruckId));
+                        const foodTruckName = foodTruckDoc.exists() ? foodTruckDoc.data().name : "غير محدد";
+
+                        return {
+                            ...complaint,
+                            foodTruckName,
+                            statusText: complaint.status === "pending" ? "قيد الإنتظار" : "تم الحل",
+                            statusClass: complaint.status === "pending" ? "status-pending" : "status-resolved",
+                        };
+                    })
+                );
+
+                // Apply filter
+                const filteredComplaints = processedComplaints.filter(complaint => {
+                    return filter === "all" || complaint.status === filter;
+                });
+
+                // Store filtered complaints for pagination
+                allComplaints = filteredComplaints;
+                totalPages = Math.ceil(allComplaints.length / rowsPerPage);
+
+                // Display current page
+                displayComplaintsPage(currentPage);
+                updatePaginationControls();
+
+            } catch (error) {
+                console.error("Error loading complaints:", error);
+                container.innerHTML = '<div class="error-message">حدث خطأ أثناء تحميل الشكاوي</div>';
+            } finally {
+                // Hide loading message after minimum 2 seconds
+                setTimeout(() => {
+                    loadingMessage.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // functions for pagination
+        function displayComplaintsPage(page) {
+            const container = document.getElementById("complaints-container");
+            container.innerHTML = "";
+
+            if (allComplaints.length === 0) {
+                container.innerHTML = '<div class="no-complaints">لا توجد شكاوي تطابق معايير التصفية</div>';
+                return;
+            }
+
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+            const complaintsToDisplay = allComplaints.slice(start, end);
+
+            complaintsToDisplay.forEach(complaint => {
+                const complaintCard = document.createElement("div");
+                complaintCard.className = "complaint-card";
+                complaintCard.setAttribute("data-id", complaint.id);
+                complaintCard.onclick = () => {
+                    window.location.href = `ComplaintDetails.html?id=${complaint.id}`;
+                };
+
+                complaintCard.innerHTML = `
+      <div class="complaint-header">
+        <div class="complaint-title">${complaint.foodTruckName || "غير محدد"}</div>
+        <div class="complaint-time">${formatTimestamp(complaint.timestamp)}</div>
+      </div>
+      <div class="complaint-preview">${complaint.description || "لا يوجد وصف"}</div>
+      <div class="complaint-footer">
+        <span class="status-badge ${complaint.statusClass}">${complaint.statusText}</span>
+        <span class="truck-info">${complaint.foodTruckName || "عربة غير معروفة"}</span>
+      </div>
+    `;
+
+                container.appendChild(complaintCard);
+            });
+        }
+
+        function updatePaginationControls() {
+            const paginationContainer = document.getElementById("pagination-controls");
+            paginationContainer.innerHTML = "";
+
+            const prevLink = document.createElement("span");
+            prevLink.textContent = "<";
+            prevLink.classList.add("pagination-link");
+            if (currentPage === 1) {
+                prevLink.classList.add("disabled");
+            } else {
+                prevLink.addEventListener("click", () => {
+                    currentPage--;
+                    displayComplaintsPage(currentPage);
+                    updatePaginationControls();
+                });
+            }
+            paginationContainer.appendChild(prevLink);
+
+            for (let i = 1; i <= totalPages; i++) {
+                const pageLink = document.createElement("span");
+                pageLink.textContent = i;
+                pageLink.classList.add("pagination-link");
+                if (i === currentPage) {
+                    pageLink.classList.add("active-page");
+                }
+                pageLink.addEventListener("click", () => {
+                    currentPage = i;
+                    displayComplaintsPage(currentPage);
+                    updatePaginationControls();
+                });
+                paginationContainer.appendChild(pageLink);
+            }
+
+            const nextLink = document.createElement("span");
+            nextLink.textContent = ">";
+            nextLink.classList.add("pagination-link");
+            if (currentPage === totalPages) {
+                nextLink.classList.add("disabled");
+            } else {
+                nextLink.addEventListener("click", () => {
+                    currentPage++;
+                    displayComplaintsPage(currentPage);
+                    updatePaginationControls();
+                });
+            }
+            paginationContainer.appendChild(nextLink);
+        }
+
+        // Modify your filterComplaints function to reset to page 1 when filtering
+        window.filterComplaints = function () {
+            currentPage = 1;
+            const statusFilter = document.getElementById("status-filter").value;
+            loadComplaints(statusFilter);
+        };
+
+        // Logout functionality
+        const logoutIcon = document.getElementById("logout-icon");
+        logoutIcon.addEventListener("click", async () => {
+            try {
+                await signOut(auth);
+                alert("تم تسجيل الخروج بنجاح!");
+                window.location.href = "WelcomePage.html";
+            } catch (error) {
+                alert("حدث خطأ أثناء تسجيل الخروج: " + error.message);
+            }
+        });
+
+        //Loading ?sg
+        // Show loading message when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            const loadingMessage = document.getElementById('loading-message');
+
+            // Show loading message
+            loadingMessage.style.display = 'flex';
+
+            // Hide after 2 seconds
+            setTimeout(() => {
+                loadingMessage.style.display = 'none';
+            }, 2000);
+        });
+
+        // Notification Functions<!--*************************************************************************************************************-->
+        async function checkPendingTrucks() {
+            try {
+                const trucksSnapshot = await getDocs(collection(db, "Food_Truck"));
+                const requestsSnapshot = await getDocs(collection(db, "Request"));
+
+                const requestStatusMap = {};
+                requestsSnapshot.forEach(doc => {
+                    requestStatusMap[doc.id] = doc.data().status;
+                });
+
+                let pendingCount = 0;
+                trucksSnapshot.forEach(doc => {
+                    const statusId = doc.data().statusId;
+                    if (statusId && requestStatusMap[statusId] === "pending") {
+                        pendingCount++;
+                    }
+                });
+
+                const badge = document.getElementById("notification-badge");
+                const icon = document.getElementById("notification-icon");
+
+                if (pendingCount > 0) {
+                    badge.textContent = pendingCount;
+                    badge.classList.remove("hidden");
+                    badge.classList.add("has-notifications");
+                    icon.style.color = "#7A557A"; // Change icon color
+                } else {
+                    badge.classList.add("hidden");
+                    badge.classList.remove("has-notifications");
+                    icon.style.color = ""; // Reset icon color
+                }
+            } catch (error) {
+                console.error("Error checking pending trucks:", error);
+            }
+        }
+
+        // Add click handler for notification icon
+        // Notification click handler
+        document.getElementById("notification-trigger").addEventListener("click", function (e) {
+            e.stopPropagation();
+            const badge = document.getElementById("notification-badge");
+            const popup = document.getElementById("notification-popup");
+            const message = document.getElementById("notification-message");
+
+            if (!badge.classList.contains("hidden")) {
+                const count = badge.textContent;
+                message.textContent = `لديك ${count} عربات قيد الانتظار!`;
+                popup.classList.toggle("hidden");
+            }
+        });
+
+        // Confirm button handler
+        document.getElementById("notification-confirm").addEventListener("click", function () {
+            window.location.href = "WaitingTrucks.html";
+        });
+
+        // Close when clicking elsewhere
+        document.addEventListener("click", function () {
+            document.getElementById("notification-popup").classList.add("hidden");
+        });
+    </script>
+</body>
+
+</html>
