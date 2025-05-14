@@ -70,10 +70,10 @@
 
         <div id="pagination-controls" style="text-align: center; margin-top: 20px"></div>
       </div>
-      <!--  <div class="loading" id="loading-message">
+       <div class="loading" id="loading-message">
           <img src="images/WaitingTruck2.png" alt="Loading Food Truck" />
           <p>الرجاء الإنتظار...</p>
-        </div> -->
+        </div> 
     </div>
   </div>
 
@@ -272,6 +272,8 @@ ${data.status === "pending" ? `
           "#location-update-table tbody"
         );
         allRows.forEach((row) => locationUpdateTableBody.appendChild(row));
+        document.getElementById("loading-message").style.display = "none";//added
+
       } catch (error) {
         console.error("Error fetching location update requests:", error);
       }
